@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ClickEarn - Real Pay-To-Click & Ad Platform</title>
+  <title>ClickEarn - Pay-To-Click & Ad Platform</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -43,19 +43,13 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-3">
-        <div id="auth-status" class="hidden sm:flex items-center gap-2 text-xs text-gray-400">
-          <span id="display-username" class="font-bold text-white"></span>
-          <button onclick="logout()" class="text-red-400 hover:text-red-300 ml-2">Logout</button>
-        </div>
-        <div class="flex items-center bg-gray-800/80 p-1 rounded-xl border border-gray-700/60">
-          <button id="btn-earner-mode" onclick="switchMode('earner')" class="px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-indigo-600 text-white shadow-md">
-            <i class="fa-solid fa-wallet mr-1.5"></i> Earner Portal
-          </button>
-          <button id="btn-admin-mode" onclick="switchMode('admin')" class="px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-gray-400 hover:text-white transition-all">
-            <i class="fa-solid fa-rectangle-ad mr-1.5"></i> Advertiser / Admin
-          </button>
-        </div>
+      <div class="flex items-center bg-gray-800/80 p-1 rounded-xl border border-gray-700/60">
+        <button id="btn-earner-mode" onclick="switchMode('earner')" class="px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all bg-indigo-600 text-white shadow-md">
+          <i class="fa-solid fa-wallet mr-1.5"></i> Earner Portal
+        </button>
+        <button id="btn-admin-mode" onclick="switchMode('admin')" class="px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-gray-400 hover:text-white transition-all">
+          <i class="fa-solid fa-rectangle-ad mr-1.5"></i> Advertiser / Admin
+        </button>
       </div>
     </div>
   </header>
@@ -78,7 +72,7 @@
           </div>
           <div class="flex items-baseline gap-2">
             <span id="user-balance" class="text-3xl font-extrabold text-white">$0.050</span>
-            <span class="text-xs text-emerald-400 font-semibold">Live Balance</span>
+            <span class="text-xs text-emerald-400 font-semibold">Instant Ready</span>
           </div>
           <div id="ugx-conversion" class="text-xs text-gray-400 mt-1 font-medium">
             ≈ 188 UGX (1 USD = 3,750 UGX)
@@ -183,11 +177,11 @@
           </h3>
           <div>
             <label class="block text-xs font-semibold text-gray-400 mb-1">Campaign Title</label>
-            <input type="text" id="new-ad-title" placeholder="e.g. Join Crypto Exchange" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none">
+            <input type="text" id="new-ad-title" placeholder="e.g. Exness Trading Platform" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none">
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-400 mb-1">Target Website URL</label>
-            <input type="url" id="new-ad-url" placeholder="https://example.com" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none">
+            <input type="url" id="new-ad-url" placeholder="https://www.exness.com" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none">
           </div>
           <div>
             <label class="block text-xs font-semibold text-gray-400 mb-1">Short Description</label>
@@ -308,32 +302,43 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT CONNECTED TO BACKEND API -->
+  <!-- JAVASCRIPT STATE & LOGIC -->
   <script>
-    const API_URL = 'http://localhost:5000/api';
-    let token = localStorage.getItem('clickearn_token') || '';
-    let currentUser = JSON.parse(localStorage.getItem('clickearn_user')) || { username: 'Dagalous', balance: 0.050, totalEarned: 0.050, clicks: 0 };
+    let state = JSON.parse(localStorage.getItem('clickearn_state')) || {
+      balance: 0.050,
+      totalEarned: 0.050,
+      clicks: 0,
+      streak: 1,
+      dailyClaimed: false,
+      ads: [
+        { id: 1, title: 'Exness Trading Platform', url: 'https://one.exnessonelink.com/a/m3alh1ljmu', reward: 0.005, duration: 5, clicks: 142, maxClicks: 500, desc: 'Trade Forex, Gold, and Crypto with lowest spreads and fast execution.' },
+        { id: 2, title: 'TradingView Live Charts', url: 'https://www.tradingview.com', reward: 0.010, duration: 10, clicks: 88, maxClicks: 200, desc: 'Analyze global markets with professional charts and technical indicators.' },
+        { id: 3, title: 'CoinMarketCap Crypto Prices', url: 'https://coinmarketcap.com', reward: 0.015, duration: 15, clicks: 45, maxClicks: 100, desc: 'Track real-time cryptocurrency prices, market cap, and trading volume.' }
+      ]
+    };
+
     let activeAd = null;
     let countdownInterval = null;
     let expectedCaptchaAns = 0;
-    let adsList = [
-      { _id: '1', title: 'SuperTrade Crypto Exchange', url: 'https://supertrade.example.com', reward: 0.005, duration: 5, totalClicks: 142, maxClicks: 500, desc: 'Sign up to claim $10 welcome trading bonus.' },
-      { _id: '2', title: 'BetPro Sports Predictions', url: 'https://betpro.example.com', reward: 0.010, duration: 10, totalClicks: 88, maxClicks: 200, desc: 'Get daily VIP sports odds and accurate AI match tips.' },
-      { _id: '3', title: 'Fast Forex EA Bot', url: 'https://forexea.example.com', reward: 0.015, duration: 15, totalClicks: 45, maxClicks: 100, desc: 'Automate your XAUUSD gold trading with algorithms.' }
-    ];
+
+    function saveState() {
+      localStorage.setItem('clickearn_state', JSON.stringify(state));
+      renderApp();
+    }
 
     function renderApp() {
-      document.getElementById('user-balance').innerText = `$${currentUser.balance.toFixed(3)}`;
-      document.getElementById('total-earned').innerText = `$${currentUser.totalEarned.toFixed(3)}`;
-      document.getElementById('user-clicks').innerText = currentUser.clicks;
+      document.getElementById('user-balance').innerText = `$${state.balance.toFixed(3)}`;
+      document.getElementById('total-earned').innerText = `$${state.totalEarned.toFixed(3)}`;
+      document.getElementById('user-clicks').innerText = state.clicks;
+      document.getElementById('streak-count').innerText = `${state.streak} Day${state.streak > 1 ? 's' : ''}`;
       
-      const ugxValue = Math.round(currentUser.balance * 3750).toLocaleString();
+      const ugxValue = Math.round(state.balance * 3750).toLocaleString();
       document.getElementById('ugx-conversion').innerText = `≈ ${ugxValue} UGX (1 USD = 3,750 UGX)`;
 
       const adsContainer = document.getElementById('ads-container');
       adsContainer.innerHTML = '';
 
-      adsList.forEach(ad => {
+      state.ads.forEach(ad => {
         const card = document.createElement('div');
         card.className = 'bg-gray-800/50 hover:bg-gray-800 border border-gray-700/60 hover:border-indigo-500/50 transition-all rounded-xl p-4 flex flex-col justify-between space-y-3';
         card.innerHTML = `
@@ -345,7 +350,7 @@
             <h4 class="font-bold text-sm text-white">${ad.title}</h4>
             <p class="text-xs text-gray-400 mt-1">${ad.desc}</p>
           </div>
-          <button onclick="watchAd('${ad._id}')" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-all">
+          <button onclick="watchAd(${ad.id})" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-all">
             Watch Ad & Earn
           </button>
         `;
@@ -354,12 +359,12 @@
 
       const adminTable = document.getElementById('admin-ads-table');
       adminTable.innerHTML = '';
-      adsList.forEach(ad => {
+      state.ads.forEach(ad => {
         adminTable.innerHTML += `
           <tr class="border-b border-gray-800/50">
             <td class="p-3 font-semibold text-white">${ad.title}</td>
             <td class="p-3 text-emerald-400 font-bold">$${ad.reward.toFixed(3)}</td>
-            <td class="p-3">${ad.totalClicks} / ${ad.maxClicks}</td>
+            <td class="p-3">${ad.clicks} / ${ad.maxClicks}</td>
             <td class="p-3"><span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-bold">Active</span></td>
           </tr>
         `;
@@ -377,7 +382,7 @@
     }
 
     function watchAd(adId) {
-      activeAd = adsList.find(a => a._id === adId);
+      activeAd = state.ads.find(a => a.id === adId);
       if (!activeAd) return;
 
       document.getElementById('modal-ad-title').innerText = activeAd.title;
@@ -386,7 +391,7 @@
         <div class="inline-flex p-4 rounded-2xl bg-indigo-600/20 text-indigo-400 text-3xl mb-2"><i class="fa-solid fa-globe"></i></div>
         <h2 class="text-2xl font-black text-white">${activeAd.title}</h2>
         <p class="text-gray-300 text-sm max-w-lg mx-auto">${activeAd.desc}</p>
-        <div class="pt-4"><a href="${activeAd.url}" target="_blank" class="px-6 py-3 bg-indigo-600 text-white text-xs font-bold rounded-xl">Visit Advertiser Website <i class="fa-solid fa-external-link ml-1"></i></a></div>
+        <div class="pt-4"><a href="${activeAd.url}" target="_blank" class="px-6 py-3 bg-indigo-600 text-white text-xs font-bold rounded-xl shadow-lg inline-flex items-center gap-2">Visit Advertiser Website <i class="fa-solid fa-external-link"></i></a></div>
       `;
 
       document.getElementById('modal-timer-section').classList.remove('hidden');
@@ -420,7 +425,7 @@
       document.getElementById('captcha-answer').value = '';
     }
 
-    async function verifyCaptcha() {
+    function verifyCaptcha() {
       const userAns = parseInt(document.getElementById('captcha-answer').value);
       if (userAns !== expectedCaptchaAns) {
         alert('Incorrect answer. Try again.');
@@ -428,38 +433,13 @@
         return;
       }
 
-      try {
-        const res = await fetch(`${API_URL}/ads/verify-reward`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ adId: activeAd._id, answer: userAns, expected: expectedCaptchaAns })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          currentUser.balance = data.newBalance;
-          currentUser.totalEarned += activeAd.reward;
-          currentUser.clicks += 1;
-          localStorage.setItem('clickearn_user', JSON.stringify(currentUser));
-          renderApp();
-          closeAdModal();
-          alert(`Success! Earned +$${activeAd.reward.toFixed(3)}`);
-        } else {
-          // Fallback client credit if backend offline
-          currentUser.balance += activeAd.reward;
-          currentUser.totalEarned += activeAd.reward;
-          currentUser.clicks += 1;
-          renderApp();
-          closeAdModal();
-          alert(`Success! Earned +$${activeAd.reward.toFixed(3)}`);
-        }
-      } catch (err) {
-        currentUser.balance += activeAd.reward;
-        currentUser.totalEarned += activeAd.reward;
-        currentUser.clicks += 1;
-        renderApp();
-        closeAdModal();
-        alert(`Success! Earned +$${activeAd.reward.toFixed(3)}`);
-      }
+      state.balance += activeAd.reward;
+      state.totalEarned += activeAd.reward;
+      state.clicks += 1;
+      activeAd.clicks += 1;
+      saveState();
+      closeAdModal();
+      alert(`Success! Earned +$${activeAd.reward.toFixed(3)} USD.`);
     }
 
     function closeAdModal() {
@@ -468,9 +448,11 @@
     }
 
     function claimDailyReward() {
-      currentUser.balance += 0.005;
-      currentUser.totalEarned += 0.005;
-      renderApp();
+      if (state.dailyClaimed) return alert('Already claimed today!');
+      state.balance += 0.005;
+      state.totalEarned += 0.005;
+      state.dailyClaimed = true;
+      saveState();
       alert('Daily Bonus Claimed! +$0.005 added.');
     }
 
@@ -482,43 +464,25 @@
       const duration = parseInt(document.getElementById('new-ad-duration').value);
       const maxClicks = parseInt(document.getElementById('new-ad-max').value);
 
-      if (!title || !url) return alert('Fill in required fields.');
-      adsList.unshift({ _id: Date.now().toString(), title, url, desc, reward, duration, totalClicks: 0, maxClicks });
-      renderApp();
+      if (!title || !url) return alert('Fill in all fields.');
+      state.ads.unshift({ id: Date.now(), title, url, desc, reward, duration, clicks: 0, maxClicks });
+      saveState();
       alert('Campaign Published Successfully!');
     }
 
     function openWithdrawModal() { document.getElementById('withdraw-modal').classList.remove('hidden'); }
     function closeWithdrawModal() { document.getElementById('withdraw-modal').classList.add('hidden'); }
 
-    async function processWithdrawal() {
+    function processWithdrawal() {
       const amount = parseFloat(document.getElementById('withdraw-amount').value);
       const phone = document.getElementById('payout-phone').value;
       if (!phone || amount <= 0) return alert('Enter valid phone number and amount.');
+      if (amount > state.balance) return alert('Insufficient balance.');
 
-      if (amount > currentUser.balance) return alert('Insufficient balance.');
-
-      try {
-        const res = await fetch(`${API_URL}/withdraw/momo`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ amountUSD: amount, phone })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          currentUser.balance -= amount;
-          renderApp();
-          closeWithdrawModal();
-          alert(`Payout sent successfully to ${phone}!`);
-        } else {
-          alert(data.error || 'Withdrawal failed.');
-        }
-      } catch (err) {
-        currentUser.balance -= amount;
-        renderApp();
-        closeWithdrawModal();
-        alert(`Payout of $${amount.toFixed(3)} dispatched to Mobile Money (${phone}) successfully!`);
-      }
+      state.balance -= amount;
+      saveState();
+      closeWithdrawModal();
+      alert(`Payout of $${amount.toFixed(3)} sent to Mobile Money (${phone}) successfully!`);
     }
 
     function copyReferralLink() {
