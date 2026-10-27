@@ -1,359 +1,648 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XAU/USD Live Order Flow & DOM Terminal</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        gold: { 400: '#FBBF24', 500: '#F59E0B', 600: '#D97706' }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #090d16; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #F59E0B; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClickEarn - Pay-To-Click & Ad Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0b0f19;
+      color: #f3f4f6;
+    }
+    .glass-card {
+      background: rgba(17, 24, 39, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glow-btn {
+      transition: all 0.25s ease;
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+    }
+    .glow-btn:hover {
+      box-shadow: 0 0 25px rgba(99, 102, 241, 0.6);
+      transform: translateY(-1px);
+    }
+    .progress-bar {
+      transition: width 1s linear;
+    }
+  </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col pb-12 selection:bg-indigo-500 selection:text-white">
 
-    <!-- Top Navigation -->
-    <header class="bg-slate-900 border-b border-slate-800 px-4 py-3 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
-            <!-- Brand -->
-            <div class="flex items-center space-x-3">
-                <div class="w-9 h-9 bg-gradient-to-tr from-amber-600 to-yellow-400 rounded-lg flex items-center justify-center text-slate-950 font-bold text-xl shadow-lg shadow-amber-500/20">
-                    <i class="fa-solid fa-coins me-0"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold tracking-wide text-white flex items-center gap-2">
-                        GoldFlow <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-semibold border border-emerald-500/30">REAL LIVE WSS</span>
-                    </h1>
-                    <p class="text-xs text-slate-400">Real-Time XAU/USD Limit Orders & Executed Market Tape</p>
-                </div>
-            </div>
-
-            <!-- Price Ticker -->
-            <div class="flex items-center space-x-6 bg-slate-950 px-4 py-1.5 rounded-lg border border-slate-800">
-                <div>
-                    <span class="text-xs text-slate-400 block uppercase tracking-wider">Live Gold Price</span>
-                    <span id="livePrice" class="text-lg font-mono font-bold text-amber-400">--.--</span>
-                </div>
-                <div class="h-6 w-px bg-slate-800"></div>
-                <div>
-                    <span class="text-xs text-slate-400 block uppercase tracking-wider">Feed Source</span>
-                    <span id="feedStatus" class="inline-flex items-center text-xs text-emerald-400 font-semibold">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping mr-1.5"></span> CONNECTING WSS...
-                    </span>
-                </div>
-            </div>
-
-            <!-- Header Actions -->
-            <div class="flex items-center space-x-3">
-                <a href="https://one.exnessonelink.com/a/m3alh1ljmu?source=app" target="_blank" rel="noopener" class="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg shadow-lg shadow-amber-500/10 flex items-center gap-1.5">
-                    <i class="fa-solid fa-arrow-trend-up"></i> Trade on Exness
-                </a>
-            </div>
+  <!-- TOP NAVIGATION BAR -->
+  <header class="sticky top-0 z-40 w-full glass-card border-b border-gray-800 bg-gray-900/80 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Logo -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-emerald-400 flex items-center justify-center text-white font-black text-xl shadow-lg">
+          <i class="fa-solid fa-bolt"></i>
         </div>
-    </header>
+        <div>
+          <span class="text-xl font-black tracking-tight text-white">ClickEarn</span>
+          <span class="text-xs text-indigo-400 block -mt-1 font-semibold uppercase tracking-wider">PTC HUB</span>
+        </div>
+      </div>
 
-    <!-- Main Workspace -->
-    <main class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <!-- Mode Switcher -->
+      <div class="flex items-center bg-gray-800/80 p-1 rounded-xl border border-gray-700/60">
+        <button id="btn-earner-mode" onclick="switchMode('earner')" class="px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 bg-indigo-600 text-white shadow-md">
+          <i class="fa-solid fa-wallet mr-1.5"></i> Earner Portal
+        </button>
+        <button id="btn-admin-mode" onclick="switchMode('admin')" class="px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-gray-400 hover:text-white transition-all duration-200">
+          <i class="fa-solid fa-rectangle-ad mr-1.5"></i> Advertiser / Admin
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+
+    <!-- ================= EARNER PORTAL ================= -->
+    <div id="earner-view" class="space-y-6">
+
+      <!-- Stats Grid Header -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        <!-- Left: Canvas Visualizer & Metrics (8 Cols) -->
-        <section class="lg:col-span-8 flex flex-col gap-4">
-            
-            <!-- Canvas Visualizer -->
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl flex flex-col gap-3">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-line text-amber-400"></i> Real-Time Tick & Price Trajectory
-                    </h3>
-                    <div class="flex items-center space-x-3 text-xs">
-                        <span class="text-slate-400">Delta CVD: <strong id="cvdMeter" class="text-emerald-400 font-mono">+0.00</strong></span>
-                    </div>
-                </div>
-                <div class="relative w-full h-80 bg-slate-950 rounded-lg overflow-hidden border border-slate-800">
-                    <canvas id="orderFlowCanvas" class="w-full h-full block"></canvas>
-                </div>
+        <!-- Balance Card -->
+        <div class="glass-card rounded-2xl p-5 border border-indigo-500/20 bg-gradient-to-br from-indigo-900/20 to-gray-900">
+          <div class="flex items-center justify-between text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">
+            <span>Available Balance</span>
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm">
+              <i class="fa-solid fa-dollar-sign"></i>
             </div>
-
-            <!-- Quick Stats & Lot Calculator -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
-                    <h4 class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-3">Live Session Volatility</h4>
-                    <div class="grid grid-cols-2 gap-3 text-center font-mono text-xs">
-                        <div class="bg-slate-950 p-2.5 rounded border border-slate-800">
-                            <span class="text-[10px] text-slate-400 block">24H HIGH</span>
-                            <span id="statHigh" class="text-emerald-400 font-bold">--.--</span>
-                        </div>
-                        <div class="bg-slate-950 p-2.5 rounded border border-slate-800">
-                            <span class="text-[10px] text-slate-400 block">24H LOW</span>
-                            <span id="statLow" class="text-rose-400 font-bold">--.--</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
-                    <h4 class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-2">XAU/USD Risk Calculator</h4>
-                    <div class="space-y-2 text-xs">
-                        <div class="flex justify-between items-center">
-                            <span class="text-slate-400">Account Capital ($):</span>
-                            <input type="number" id="calcBal" value="1000" class="w-24 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-right font-mono text-white outline-none">
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-slate-400">Risk Limit (%):</span>
-                            <input type="number" id="calcRisk" value="1" step="0.5" class="w-24 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-right font-mono text-white outline-none">
-                        </div>
-                        <div class="flex justify-between items-center pt-2 border-t border-slate-800">
-                            <span class="text-slate-300 font-medium">Position Size:</span>
-                            <span id="calcResult" class="text-sm font-mono font-bold text-amber-400">0.25 Lots</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </section>
-
-        <!-- Right: Real DOM Limit Orders & Executed Orders Tape (4 Cols) -->
-        <section class="lg:col-span-4 flex flex-col gap-4">
-            
-            <!-- DOM Limit Orders (Asks & Bids) -->
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl flex flex-col h-[380px]">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                        <i class="fa-solid fa-layer-group text-amber-400"></i> Live Limit Orders (DOM)
-                    </h3>
-                    <span class="text-[10px] text-slate-400">Order Book Depth</span>
-                </div>
-
-                <div class="grid grid-cols-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 py-1 border-b border-slate-800 text-center">
-                    <span>Ask Size</span>
-                    <span>Price</span>
-                    <span>Bid Size</span>
-                </div>
-
-                <div id="domContainer" class="flex-1 overflow-y-auto custom-scrollbar space-y-0.5 py-1 text-xs font-mono">
-                    <div class="text-center text-slate-500 py-12">Connecting to Live Order Book WSS...</div>
-                </div>
-            </div>
-
-            <!-- Executed Orders (Time & Sales Tape) -->
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl flex-1 flex flex-col min-h-[260px]">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
-                        <i class="fa-solid fa-bolt text-amber-400"></i> Executed Market Orders
-                    </h3>
-                    <span class="text-[10px] text-slate-400">Time & Sales Tape</span>
-                </div>
-
-                <div class="grid grid-cols-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 py-1 border-b border-slate-800 text-center">
-                    <span>Time</span>
-                    <span>Price</span>
-                    <span>Volume</span>
-                </div>
-
-                <div id="tapeContainer" class="flex-1 overflow-y-auto custom-scrollbar space-y-1 py-1 text-xs font-mono">
-                    <!-- Executed orders populated here -->
-                </div>
-            </div>
-
-        </section>
-
-    </main>
-
-    <!-- Exness Partner Footer -->
-    <footer class="bg-slate-900 border-t border-slate-800 py-4 px-4 mt-auto">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center space-x-3">
-                <i class="fa-solid fa-shield-halved text-amber-400 text-xl"></i>
-                <div class="text-xs">
-                    <span class="text-slate-200 font-semibold block">Official Gold Execution Partner</span>
-                    <span class="text-slate-400">Trade real XAU/USD gold pairs on Exness with instant liquidity and tight spreads.</span>
-                </div>
-            </div>
-            <a href="https://one.exnessonelink.com/a/m3alh1ljmu?source=app" target="_blank" rel="noopener" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-6 py-2.5 rounded-lg shadow-lg shadow-amber-500/20 whitespace-nowrap">
-                Open Free Exness Account
-            </a>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="user-balance" class="text-3xl font-extrabold text-white">$0.050</span>
+            <span class="text-xs text-emerald-400 font-semibold">+100% Instant</span>
+          </div>
+          <div id="ugx-conversion" class="text-xs text-gray-400 mt-1 font-medium">
+            ≈ 188 UGX (1 USD = 3,750 UGX)
+          </div>
+          <button onclick="openWithdrawModal()" class="w-full mt-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg shadow-emerald-600/20">
+            Withdraw Earnings
+          </button>
         </div>
-    </footer>
 
-    <!-- WebSocket & Canvas Script -->
-    <script>
-        let currentPrice = 2742.50;
-        let highPrice = 2756.20;
-        let lowPrice = 2731.10;
-        let priceHistory = [];
-        let cumulativeDelta = 0;
-        let asksList = [];
-        let bidsList = [];
+        <!-- Daily Streak -->
+        <div class="glass-card rounded-2xl p-5">
+          <div class="flex items-center justify-between text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">
+            <span>Daily Rewards Streak</span>
+            <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-sm">
+              <i class="fa-solid fa-fire"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="streak-count" class="text-3xl font-extrabold text-white">1 Day</span>
+            <span class="text-xs text-amber-400 font-semibold">+0.005 Bonus</span>
+          </div>
+          <div class="w-full bg-gray-800 h-2 rounded-full mt-3 overflow-hidden">
+            <div class="bg-amber-500 h-full w-1/7"></div>
+          </div>
+          <button id="btn-claim-daily" onclick="claimDailyReward()" class="w-full mt-3 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold transition-all">
+            Claim Daily Bonus ($0.005)
+          </button>
+        </div>
 
-        // Connect to Real Live Binance WebSockets for PAXGUSDT (Gold Spot Proxy)
-        function initLiveWebSockets() {
-            const badge = document.getElementById('feedStatus');
+        <!-- Total Ads Watched -->
+        <div class="glass-card rounded-2xl p-5">
+          <div class="flex items-center justify-between text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">
+            <span>Total Ads Watched</span>
+            <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-sm">
+              <i class="fa-solid fa-eye"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="user-clicks" class="text-3xl font-extrabold text-white">0</span>
+            <span class="text-xs text-gray-400">clicks</span>
+          </div>
+          <div class="text-xs text-gray-400 mt-2">
+            Total Earned: <span id="total-earned" class="text-indigo-400 font-bold">$0.050</span>
+          </div>
+          <div class="text-xs text-gray-500 mt-3 pt-2 border-t border-gray-800">
+            Level 1 Earner (0.5% Cash bonus active)
+          </div>
+        </div>
 
-            // 1. Trade Stream (Executed Market Orders / Time & Sales)
-            const tradeWs = new WebSocket('wss://stream.binance.com:9443/ws/paxgusdt@trade');
-            
-            tradeWs.onopen = () => {
-                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping mr-1.5"></span> LIVE WSS CONNECTED`;
-            };
+        <!-- Referral Link Card -->
+        <div class="glass-card rounded-2xl p-5">
+          <div class="flex items-center justify-between text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">
+            <span>Referral Program</span>
+            <div class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center text-sm">
+              <i class="fa-solid fa-users"></i>
+            </div>
+          </div>
+          <p class="text-xs text-gray-400 mb-3">
+            Earn <span class="text-purple-400 font-bold">10% commission</span> for every ad click your referred friends watch!
+          </p>
+          <button onclick="copyReferralLink()" class="w-full py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2">
+            <i class="fa-regular fa-copy"></i>
+            <span id="ref-btn-text">Copy Referral Link</span>
+          </button>
+        </div>
 
-            tradeWs.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                const price = parseFloat(data.p).toFixed(2);
-                const qty = parseFloat(data.q).toFixed(2);
-                const isSell = data.m; // true if market maker was seller (aggressive sell)
+      </div>
 
-                currentPrice = parseFloat(price);
-                if (currentPrice > highPrice) highPrice = currentPrice;
-                if (currentPrice < lowPrice) lowPrice = currentPrice;
+      <!-- Paid To Click (PTC) Ads Section -->
+      <div class="glass-card rounded-2xl p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+              <i class="fa-solid fa-play text-indigo-400"></i> Available Sponsored Ads
+            </h2>
+            <p class="text-xs text-gray-400 mt-0.5">Click any ad, wait for the timer to finish, and complete verification to get paid instant cash.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-gray-400">Sort by:</span>
+            <select class="bg-gray-800 border border-gray-700 text-xs rounded-lg px-3 py-1.5 text-gray-300 focus:outline-none">
+              <option>Highest Reward</option>
+              <option>Shortest Duration</option>
+            </select>
+          </div>
+        </div>
 
-                document.getElementById('livePrice').innerText = currentPrice.toFixed(2);
-                document.getElementById('statHigh').innerText = highPrice.toFixed(2);
-                document.getElementById('statLow').innerText = lowPrice.toFixed(2);
+        <!-- Ads Grid -->
+        <div id="ads-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Dynamic Ads load here -->
+        </div>
+      </div>
 
-                cumulativeDelta += isSell ? -parseFloat(qty) : parseFloat(qty);
-                const cvdEl = document.getElementById('cvdMeter');
-                cvdEl.innerText = (cumulativeDelta > 0 ? '+' : '') + cumulativeDelta.toFixed(2);
-                cvdEl.className = `font-mono ${cumulativeDelta >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+    </div>
 
-                addExecutedOrderRow(price, qty, isSell);
-            };
+    <!-- ================= ADVERTISER / ADMIN PORTAL ================= -->
+    <div id="admin-view" class="space-y-6 hidden">
+      
+      <!-- Section Header -->
+      <div class="glass-card rounded-2xl p-6 bg-gradient-to-r from-gray-900 via-indigo-950/40 to-gray-900">
+        <h2 class="text-2xl font-black text-white flex items-center gap-2">
+          <i class="fa-solid fa-rectangle-ad text-indigo-400"></i> Advertiser Dashboard
+        </h2>
+        <p class="text-sm text-gray-400 mt-1">
+          Create paid ad campaigns to drive targeted traffic to your links, affiliate sites, or applications.
+        </p>
+      </div>
 
-            tradeWs.onerror = () => {
-                badge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 mr-1.5"></span> ENGINE ACTIVE`;
-            };
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            // 2. Depth Stream (Live Limit Orders / DOM Book)
-            const depthWs = new WebSocket('wss://stream.binance.com:9443/ws/paxgusdt@depth10@100ms');
-            depthWs.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                asksList = data.asks.slice(0, 5);
-                bidsList = data.bids.slice(0, 5);
-                renderDOMBook();
-            };
+        <!-- Create Campaign Form -->
+        <div class="lg:col-span-1 glass-card rounded-2xl p-6 space-y-4">
+          <h3 class="text-lg font-bold text-white flex items-center gap-2 pb-3 border-b border-gray-800">
+            <i class="fa-solid fa-plus-circle text-emerald-400"></i> Create New Ad Campaign
+          </h3>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-400 mb-1">Campaign Title</label>
+            <input type="text" id="new-ad-title" placeholder="e.g. Join High-Yield Crypto Exchange" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-400 mb-1">Target Website URL</label>
+            <input type="url" id="new-ad-url" placeholder="https://example.com" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500">
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-400 mb-1">Short Description</label>
+            <textarea id="new-ad-desc" rows="2" placeholder="Briefly describe what users will see..." class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500"></textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-gray-400 mb-1">Pay Per Click ($)</label>
+              <input type="number" step="0.001" id="new-ad-reward" value="0.005" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-gray-400 mb-1">Duration (Seconds)</label>
+              <select id="new-ad-duration" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+                <option value="5">5 Seconds</option>
+                <option value="10" selected>10 Seconds</option>
+                <option value="15">15 Seconds</option>
+                <option value="30">30 Seconds</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-400 mb-1">Target Click Quantity</label>
+            <input type="number" id="new-ad-max" value="100" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500">
+          </div>
+
+          <button onclick="createNewAd()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-xs glow-btn transition-all">
+            Publish & Launch Campaign
+          </button>
+        </div>
+
+        <!-- Active Campaigns Manager -->
+        <div class="lg:col-span-2 glass-card rounded-2xl p-6">
+          <h3 class="text-lg font-bold text-white flex items-center gap-2 mb-4 pb-3 border-b border-gray-800">
+            <i class="fa-solid fa-list-check text-indigo-400"></i> Manage Active Campaigns
+          </h3>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-gray-300">
+              <thead class="bg-gray-800/60 uppercase text-gray-400 text-[10px]">
+                <tr>
+                  <th class="p-3">Ad Title</th>
+                  <th class="p-3">Pay / Click</th>
+                  <th class="p-3">Clicks Delivered</th>
+                  <th class="p-3">Status</th>
+                  <th class="p-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="admin-ads-table" class="divide-y divide-gray-800">
+                <!-- Admin Table Dynamic Content -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ================= AD WATCHER FULLSCREEN MODAL ================= -->
+  <div id="ad-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col hidden">
+    <!-- Header Controls & Timer -->
+    <div class="h-16 bg-gray-900 border-b border-gray-800 px-4 sm:px-8 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="modal-ad-title" class="font-bold text-sm text-white truncate max-w-[200px] sm:max-w-xs">Ad Title</span>
+        <span id="modal-ad-reward" class="text-xs bg-emerald-500/20 text-emerald-300 px-2.5 py-1 rounded-full font-bold">Earn $0.000</span>
+      </div>
+
+      <!-- Timer & Captcha Container -->
+      <div id="modal-timer-section" class="flex items-center gap-4">
+        <div class="text-right">
+          <div class="text-[10px] text-gray-400 uppercase font-bold">Time Remaining</div>
+          <div id="modal-countdown" class="text-lg font-black text-indigo-400">10s</div>
+        </div>
+        <div class="w-32 sm:w-48 bg-gray-800 h-3 rounded-full overflow-hidden border border-gray-700">
+          <div id="modal-progress-bar" class="bg-gradient-to-r from-indigo-500 to-emerald-400 h-full w-0"></div>
+        </div>
+      </div>
+
+      <!-- Captcha Verification (Initially Hidden) -->
+      <div id="modal-captcha-section" class="hidden flex items-center gap-2 bg-gray-800 px-3 py-1.5 rounded-xl border border-indigo-500/40">
+        <span id="captcha-math-q" class="text-xs font-bold text-white">3 + 4 = ?</span>
+        <input type="number" id="captcha-answer" placeholder="Ans" class="w-14 bg-gray-900 border border-gray-700 text-xs px-2 py-1 rounded text-white text-center focus:outline-none">
+        <button onclick="verifyCaptcha()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-all">
+          Verify & Get Paid
+        </button>
+      </div>
+
+      <button onclick="closeAdModal()" class="text-gray-400 hover:text-white text-xl p-2">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Website Simulation Viewport -->
+    <div class="flex-grow w-full bg-gray-950 p-4 sm:p-8 flex items-center justify-center overflow-auto">
+      <div id="modal-mockup-body" class="w-full max-w-4xl bg-gray-900 border border-gray-800 rounded-2xl p-8 space-y-6 text-center shadow-2xl">
+        <!-- Built-in preview card rendered here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= WITHDRAWAL MODAL ================= -->
+  <div id="withdraw-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="glass-card max-w-md w-full rounded-2xl p-6 border border-gray-800 space-y-4">
+      <div class="flex justify-between items-center pb-3 border-b border-gray-800">
+        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-money-bill-transfer text-emerald-400"></i> Withdraw Funds
+        </h3>
+        <button onclick="closeWithdrawModal()" class="text-gray-400 hover:text-white">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-400 mb-1">Payout Method</label>
+        <select id="payout-method" onchange="togglePayoutMethodFields()" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none">
+          <option value="momo">MTN / Airtel Mobile Money (UGX)</option>
+          <option value="crypto">USDT / Crypto Wallet (BEP20 / TRC20)</option>
+          <option value="payeer">Payeer / Perfect Money</option>
+        </select>
+      </div>
+
+      <div id="momo-field">
+        <label class="block text-xs font-semibold text-gray-400 mb-1">Mobile Money Number</label>
+        <input type="text" id="payout-phone" placeholder="e.g. 0770000000 / 0700000000" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none">
+      </div>
+
+      <div id="crypto-field" class="hidden">
+        <label class="block text-xs font-semibold text-gray-400 mb-1">Wallet Address</label>
+        <input type="text" id="payout-address" placeholder="e.g. 0x... or T..." class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none">
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-400 mb-1">Amount ($)</label>
+        <input type="number" id="withdraw-amount" value="0.050" min="0.01" step="0.001" class="w-full bg-gray-800 border border-gray-700 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none">
+      </div>
+
+      <div class="bg-indigo-950/40 p-3 rounded-xl border border-indigo-500/20 text-xs text-indigo-300">
+        Minimum payout threshold: <strong>$0.010 USD</strong>. Withdrawals are processed instantly to registered mobile wallets.
+      </div>
+
+      <button onclick="processWithdrawal()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-emerald-600/20 transition-all">
+        Confirm Instant Payout
+      </button>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // State Initialization with localStorage
+    let state = JSON.parse(localStorage.getItem('clickearn_state')) || {
+      balance: 0.050,
+      totalEarned: 0.050,
+      clicks: 0,
+      streak: 1,
+      dailyClaimed: false,
+      ads: [
+        { id: 1, title: 'SuperTrade Crypto Exchange', url: 'https://supertrade.example.com', reward: 0.005, duration: 5, clicks: 142, maxClicks: 500, desc: 'Sign up to claim $10 welcome trading bonus in crypto.' },
+        { id: 2, title: 'BetPro Sports Predictions', url: 'https://betpro.example.com', reward: 0.010, duration: 10, clicks: 88, maxClicks: 200, desc: 'Get daily VIP sports odds and accurate AI match tips.' },
+        { id: 3, title: 'Fast Forex EA Bot', url: 'https://forexea.example.com', reward: 0.015, duration: 15, clicks: 45, maxClicks: 100, desc: 'Automate your XAUUSD gold trading with Smart Money algorithms.' },
+        { id: 4, title: 'Cloud Miner Pro', url: 'https://cloudminer.example.com', reward: 0.008, duration: 10, clicks: 310, maxClicks: 1000, desc: 'Start free daily Bitcoin cloud mining without hardware.' }
+      ]
+    };
+
+    let activeAd = null;
+    let countdownInterval = null;
+    let expectedCaptchaAns = 0;
+
+    function saveState() {
+      localStorage.setItem('clickearn_state', JSON.stringify(state));
+      renderApp();
+    }
+
+    function renderApp() {
+      // Update stats
+      document.getElementById('user-balance').innerText = `$${state.balance.toFixed(3)}`;
+      document.getElementById('total-earned').innerText = `$${state.totalEarned.toFixed(3)}`;
+      document.getElementById('user-clicks').innerText = state.clicks;
+      document.getElementById('streak-count').innerText = `${state.streak} Day${state.streak > 1 ? 's' : ''}`;
+      
+      const ugxValue = Math.round(state.balance * 3750).toLocaleString();
+      document.getElementById('ugx-conversion').innerText = `≈ ${ugxValue} UGX (1 USD = 3,750 UGX)`;
+
+      // Render Ads for Earner
+      const adsContainer = document.getElementById('ads-container');
+      adsContainer.innerHTML = '';
+
+      state.ads.forEach(ad => {
+        const adCard = document.createElement('div');
+        adCard.className = 'bg-gray-800/50 hover:bg-gray-800 border border-gray-700/60 hover:border-indigo-500/50 transition-all rounded-xl p-4 flex flex-col justify-between space-y-3';
+        adCard.innerHTML = `
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-xs bg-indigo-500/20 text-indigo-300 font-bold px-2.5 py-0.5 rounded-full border border-indigo-500/30">
+                ${ad.duration}s timer
+              </span>
+              <span class="text-sm font-extrabold text-emerald-400">
+                +$${ad.reward.toFixed(3)}
+              </span>
+            </div>
+            <h4 class="font-bold text-sm text-white">${ad.title}</h4>
+            <p class="text-xs text-gray-400 line-clamp-2 mt-1">${ad.desc}</p>
+          </div>
+          <button onclick="watchAd(${ad.id})" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold transition-all shadow-md">
+            Watch Ad & Earn
+          </button>
+        `;
+        adsContainer.appendChild(adCard);
+      });
+
+      // Render Admin Table
+      const adminTable = document.getElementById('admin-ads-table');
+      adminTable.innerHTML = '';
+      state.ads.forEach(ad => {
+        const tr = document.createElement('tr');
+        tr.className = 'border-b border-gray-800/50 hover:bg-gray-800/30';
+        tr.innerHTML = `
+          <td class="p-3 font-semibold text-white">${ad.title}</td>
+          <td class="p-3 text-emerald-400 font-bold">$${ad.reward.toFixed(3)}</td>
+          <td class="p-3">${ad.clicks} / ${ad.maxClicks}</td>
+          <td class="p-3"><span class="px-2 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded-full font-bold">Active</span></td>
+          <td class="p-3 text-right">
+            <button onclick="deleteAd(${ad.id})" class="text-red-400 hover:text-red-300">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        `;
+        adminTable.appendChild(tr);
+      });
+    }
+
+    function switchMode(mode) {
+      const earnerView = document.getElementById('earner-view');
+      const adminView = document.getElementById('admin-view');
+      const btnEarner = document.getElementById('btn-earner-mode');
+      const btnAdmin = document.getElementById('btn-admin-mode');
+
+      if (mode === 'earner') {
+        earnerView.classList.remove('hidden');
+        adminView.classList.add('hidden');
+        btnEarner.className = 'px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 bg-indigo-600 text-white shadow-md';
+        btnAdmin.className = 'px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-gray-400 hover:text-white transition-all duration-200';
+      } else {
+        adminView.classList.remove('hidden');
+        earnerView.classList.add('hidden');
+        btnAdmin.className = 'px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all duration-200 bg-indigo-600 text-white shadow-md';
+        btnEarner.className = 'px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-gray-400 hover:text-white transition-all duration-200';
+      }
+    }
+
+    function watchAd(adId) {
+      activeAd = state.ads.find(a => a.id === adId);
+      if (!activeAd) return;
+
+      document.getElementById('modal-ad-title').innerText = activeAd.title;
+      document.getElementById('modal-ad-reward').innerText = `Earn +$${activeAd.reward.toFixed(3)}`;
+      
+      // Render clean landing page mockup into modal
+      document.getElementById('modal-mockup-body').innerHTML = `
+        <div class="inline-flex p-4 rounded-2xl bg-indigo-600/20 text-indigo-400 text-3xl mb-2">
+          <i class="fa-solid fa-globe"></i>
+        </div>
+        <h2 class="text-2xl font-black text-white">${activeAd.title}</h2>
+        <p class="text-gray-300 text-sm max-w-lg mx-auto">${activeAd.desc}</p>
+        <div class="pt-4">
+          <a href="${activeAd.url}" target="_blank" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg">
+            Visit Advertiser Website directly <i class="fa-solid fa-external-link"></i>
+          </a>
+        </div>
+      `;
+
+      // Reset timer UI
+      document.getElementById('modal-timer-section').classList.remove('hidden');
+      document.getElementById('modal-captcha-section').classList.add('hidden');
+      document.getElementById('modal-progress-bar').style.width = '0%';
+
+      document.getElementById('ad-modal').classList.remove('hidden');
+
+      let timeLeft = activeAd.duration;
+      document.getElementById('modal-countdown').innerText = `${timeLeft}s`;
+
+      const totalTime = timeLeft;
+      clearInterval(countdownInterval);
+
+      countdownInterval = setInterval(() => {
+        timeLeft--;
+        const progressPercent = ((totalTime - timeLeft) / totalTime) * 100;
+        document.getElementById('modal-progress-bar').style.width = `${progressPercent}%`;
+        document.getElementById('modal-countdown').innerText = `${timeLeft}s`;
+
+        if (timeLeft <= 0) {
+          clearInterval(countdownInterval);
+          showCaptcha();
         }
+      }, 1000);
+    }
 
-        // Render Live Limit Order Book (DOM)
-        function renderDOMBook() {
-            const container = document.getElementById('domContainer');
-            container.innerHTML = '';
+    function showCaptcha() {
+      document.getElementById('modal-timer-section').classList.add('hidden');
+      document.getElementById('modal-captcha-section').classList.remove('hidden');
 
-            // Asks (Sells above market)
-            asksList.reverse().forEach(([price, qty]) => {
-                const p = parseFloat(price).toFixed(2);
-                const q = parseFloat(qty).toFixed(2);
-                const row = document.createElement('div');
-                row.className = 'grid grid-cols-3 text-center py-0.5 rounded hover:bg-slate-800/50';
-                row.innerHTML = `<span class="text-rose-400 font-semibold">${q}</span><span class="text-slate-300 font-bold">${p}</span><span class="text-slate-600">-</span>`;
-                container.appendChild(row);
-            });
+      const n1 = Math.floor(Math.random() * 9) + 1;
+      const n2 = Math.floor(Math.random() * 9) + 1;
+      expectedCaptchaAns = n1 + n2;
+      document.getElementById('captcha-math-q').innerText = `${n1} + ${n2} = ?`;
+      document.getElementById('captcha-answer').value = '';
+    }
 
-            // Spread Divider
-            const bar = document.createElement('div');
-            bar.className = 'bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold text-center py-0.5 my-0.5 rounded text-[11px]';
-            bar.innerText = `SPREAD / PRICE: ${currentPrice.toFixed(2)}`;
-            container.appendChild(bar);
+    function verifyCaptcha() {
+      const userAns = parseInt(document.getElementById('captcha-answer').value);
+      if (userAns === expectedCaptchaAns) {
+        // Credit rewards
+        state.balance += activeAd.reward;
+        state.totalEarned += activeAd.reward;
+        state.clicks += 1;
+        activeAd.clicks += 1;
 
-            // Bids (Buys below market)
-            bidsList.forEach(([price, qty]) => {
-                const p = parseFloat(price).toFixed(2);
-                const q = parseFloat(qty).toFixed(2);
-                const row = document.createElement('div');
-                row.className = 'grid grid-cols-3 text-center py-0.5 rounded hover:bg-slate-800/50';
-                row.innerHTML = `<span class="text-slate-600">-</span><span class="text-slate-300 font-bold">${p}</span><span class="text-emerald-400 font-semibold">${q}</span>`;
-                container.appendChild(row);
-            });
-        }
+        saveState();
+        closeAdModal();
+        alert(`Success! You earned +$${activeAd.reward.toFixed(3)} USD.`);
+      } else {
+        alert('Incorrect answer. Please try again.');
+        showCaptcha();
+      }
+    }
 
-        // Add Executed Market Orders to Tape
-        function addExecutedOrderRow(price, qty, isSell) {
-            const container = document.getElementById('tapeContainer');
-            const now = new Date();
-            const timeStr = now.toTimeString().split(' ')[0];
+    function closeAdModal() {
+      clearInterval(countdownInterval);
+      document.getElementById('ad-modal').classList.add('hidden');
+    }
 
-            const row = document.createElement('div');
-            row.className = `grid grid-cols-3 text-center py-0.5 px-1 rounded ${isSell ? 'bg-rose-500/10 text-rose-400' : 'bg-emerald-500/10 text-emerald-400'}`;
-            row.innerHTML = `<span class="text-slate-400 text-[10px]">${timeStr}</span><span class="font-bold">${price}</span><span class="font-mono">${qty} ${isSell ? 'ASK' : 'BID'}</span>`;
+    function claimDailyReward() {
+      if (state.dailyClaimed) {
+        alert('You have already claimed today\'s bonus! Come back tomorrow.');
+        return;
+      }
+      state.balance += 0.005;
+      state.totalEarned += 0.005;
+      state.dailyClaimed = true;
+      document.getElementById('btn-claim-daily').innerText = 'Daily Bonus Claimed ✓';
+      document.getElementById('btn-claim-daily').classList.add('opacity-50', 'cursor-not-allowed');
+      saveState();
+      alert('Daily Bonus Claimed! +$0.005 added to your balance.');
+    }
 
-            container.insertBefore(row, container.firstChild);
-            if (container.children.length > 25) container.removeChild(container.lastChild);
-        }
+    function createNewAd() {
+      const title = document.getElementById('new-ad-title').value.trim();
+      const url = document.getElementById('new-ad-url').value.trim();
+      const desc = document.getElementById('new-ad-desc').value.trim();
+      const reward = parseFloat(document.getElementById('new-ad-reward').value);
+      const duration = parseInt(document.getElementById('new-ad-duration').value);
+      const maxClicks = parseInt(document.getElementById('new-ad-max').value);
 
-        // HTML5 Canvas Order Flow Trajectory
-        function initCanvas() {
-            const canvas = document.getElementById('orderFlowCanvas');
-            const ctx = canvas.getContext('2d');
-            
-            function resize() {
-                canvas.width = canvas.parentElement.clientWidth;
-                canvas.height = canvas.parentElement.clientHeight;
-            }
-            window.addEventListener('resize', resize);
-            resize();
+      if (!title || !url || !desc || isNaN(reward)) {
+        alert('Please complete all form fields correctly.');
+        return;
+      }
 
-            function draw() {
-                ctx.fillStyle = '#090D16';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const newAd = {
+        id: Date.now(),
+        title,
+        url,
+        desc,
+        reward,
+        duration,
+        clicks: 0,
+        maxClicks
+      };
 
-                priceHistory.push(currentPrice);
-                if (priceHistory.length > canvas.width / 3) priceHistory.shift();
+      state.ads.unshift(newAd);
+      saveState();
 
-                if (priceHistory.length > 1) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = '#F59E0B';
-                    ctx.lineWidth = 2;
-                    for (let i = 0; i < priceHistory.length; i++) {
-                        const x = i * 3;
-                        const y = canvas.height / 2 - (priceHistory[i] - currentPrice) * 35;
-                        if (i === 0) ctx.moveTo(x, y);
-                        else ctx.lineTo(x, y);
-                    }
-                    ctx.stroke();
-                }
-                requestAnimationFrame(draw);
-            }
-            draw();
-        }
+      // Clear Form
+      document.getElementById('new-ad-title').value = '';
+      document.getElementById('new-ad-url').value = '';
+      document.getElementById('new-ad-desc').value = '';
 
-        // Lot Calculator logic
-        function initCalculator() {
-            const balInput = document.getElementById('calcBal');
-            const riskInput = document.getElementById('calcRisk');
-            const resOutput = document.getElementById('calcResult');
+      alert('Ad Campaign Published Successfully!');
+    }
 
-            function calc() {
-                const bal = parseFloat(balInput.value) || 0;
-                const risk = parseFloat(riskInput.value) || 0;
-                const riskAmt = bal * (risk / 100);
-                const lots = (riskAmt / 400).toFixed(2);
-                resOutput.innerText = `${lots} Lots`;
-            }
+    function deleteAd(id) {
+      if (confirm('Are you sure you want to remove this campaign?')) {
+        state.ads = state.ads.filter(a => a.id !== id);
+        saveState();
+      }
+    }
 
-            balInput.addEventListener('input', calc);
-            riskInput.addEventListener('input', calc);
-            calc();
-        }
+    function openWithdrawModal() {
+      document.getElementById('withdraw-modal').classList.remove('hidden');
+    }
 
-        window.onload = () => {
-            initLiveWebSockets();
-            initCanvas();
-            initCalculator();
-        };
-    </script>
+    function closeWithdrawModal() {
+      document.getElementById('withdraw-modal').classList.add('hidden');
+    }
+
+    function togglePayoutMethodFields() {
+      const method = document.getElementById('payout-method').value;
+      const momoField = document.getElementById('momo-field');
+      const cryptoField = document.getElementById('crypto-field');
+
+      if (method === 'crypto') {
+        momoField.classList.add('hidden');
+        cryptoField.classList.remove('hidden');
+      } else {
+        momoField.classList.remove('hidden');
+        cryptoField.classList.add('hidden');
+      }
+    }
+
+    function processWithdrawal() {
+      const amount = parseFloat(document.getElementById('withdraw-amount').value);
+      if (amount <= 0 || isNaN(amount)) {
+        alert('Please enter a valid withdrawal amount.');
+        return;
+      }
+      if (amount > state.balance) {
+        alert('Insufficient balance.');
+        return;
+      }
+
+      state.balance -= amount;
+      saveState();
+      closeWithdrawModal();
+      alert(`Withdrawal request of $${amount.toFixed(3)} submitted successfully! Processed instantly.`);
+    }
+
+    function copyReferralLink() {
+      const dummyLink = `${window.location.origin}${window.location.pathname}?ref=user123`;
+      navigator.clipboard.writeText(dummyLink);
+      const btnText = document.getElementById('ref-btn-text');
+      btnText.innerText = 'Copied to Clipboard!';
+      setTimeout(() => {
+        btnText.innerText = 'Copy Referral Link';
+      }, 2000);
+    }
+
+    // Initialize App
+    renderApp();
+  </script>
 </body>
 </html>
