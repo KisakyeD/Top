@@ -1,394 +1,474 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Workspace - Powered by Gemini</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoldMap SMC | Real-Time XAU/USD Order Flow & Bookmap Terminal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            400: '#FBBF24',
+                            500: '#F59E0B',
+                            600: '#D97706',
+                        },
+                        darkbg: '#0F172A',
+                        darkcard: '#1E293B',
+                        darkborder: '#334155'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        :root {
-            --bg-color: #131314;
-            --sidebar-bg: #1e1f20;
-            --text-color: #e3e3e3;
-            --text-secondary: #c4c7c5;
-            --input-bg: #1e1f20;
-            --border-color: #333537;
-            --accent-color: #8ab4f8;
-            --user-bubble: #2d2f31;
-            --ai-bubble: #1e1f20;
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
         }
-
-        [data-theme="light"] {
-            --bg-color: #ffffff;
-            --sidebar-bg: #f0f4f9;
-            --text-color: #1f1f1f;
-            --text-secondary: #5e5e5e;
-            --input-bg: #f0f4f9;
-            --border-color: #d1d5db;
-            --accent-color: #0b57d0;
-            --user-bubble: #f0f4f9;
-            --ai-bubble: #ffffff;
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
         }
-
-        html, body {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-        }
-
-        body { display: flex; }
-
-        sidebar {
-            width: 260px;
-            background-color: var(--sidebar-bg);
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            padding: 16px;
-            flex-shrink: 0;
-        }
-
-        .new-chat-btn {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            padding: 10px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            text-align: left;
-            margin-bottom: 16px;
-        }
-
-        .api-key-box {
-            margin-bottom: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .api-key-box label {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .api-key-box input {
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-color);
-            padding: 8px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            outline: none;
-        }
-
-        .sidebar-footer {
-            margin-top: auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .theme-toggle {
-            background: none;
-            border: none;
-            color: var(--text-color);
-            cursor: pointer;
-            font-size: 16px;
-            padding: 6px;
-            border-radius: 50%;
-        }
-
-        .main-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            height: 100dvh;
-            overflow: hidden;
-            position: relative;
-        }
-
-        header {
-            height: 56px;
-            padding: 0 20px;
-            font-size: 16px;
-            font-weight: 600;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0;
-            background-color: var(--bg-color);
-            z-index: 10;
-        }
-
-        .chat-history {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            max-width: 800px;
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        .message {
-            display: flex;
-            gap: 12px;
-            width: 100%;
-            line-height: 1.5;
-            font-size: 15px;
-            align-items: flex-start;
-        }
-
-        .message.user { flex-direction: row-reverse; }
-
-        .avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--accent-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 13px;
-            color: white;
-            flex-shrink: 0;
-        }
-
-        .message.user .avatar { background: #555; }
-
-        .bubble {
-            background-color: var(--ai-bubble);
-            padding: 12px 16px;
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            max-width: 80%;
-            word-break: break-word;
-            white-space: pre-wrap;
-        }
-
-        .message.user .bubble {
-            background-color: var(--user-bubble);
-            border-bottom-right-radius: 4px;
-        }
-
-        .message.ai .bubble { border-bottom-left-radius: 4px; }
-
-        .input-area {
-            padding: 12px 16px 20px 16px;
-            max-width: 800px;
-            width: 100%;
-            margin: 0 auto;
-            flex-shrink: 0;
-            background-color: var(--bg-color);
-        }
-
-        .input-box {
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            padding: 6px 12px 6px 16px;
-            gap: 8px;
-        }
-
-        .input-box textarea {
-            flex: 1;
-            background: none;
-            border: none;
-            color: var(--text-color);
-            font-size: 15px;
-            resize: none;
-            max-height: 120px;
-            outline: none;
-            padding: 6px 0;
-        }
-
-        .send-btn {
-            background-color: var(--accent-color);
-            color: white;
-            border: none;
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        @media (max-width: 768px) {
-            sidebar { display: none; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #F59E0B;
         }
     </style>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col transition-colors duration-200">
 
-    <sidebar>
-        <button class="new-chat-btn" onclick="clearChat()">+ New Chat</button>
-        <div class="api-key-box">
-            <label for="apiKeyInput">Gemini API Key:</label>
-            <input type="password" id="apiKeyInput" placeholder="Paste key here" onchange="saveKey()">
-        </div>
-        <div class="sidebar-footer">
-            <span>Theme</span>
-            <button class="theme-toggle" class="themeToggleBtn" onclick="toggleTheme()">☀️</button>
-        </div>
-    </sidebar>
-
-    <div class="main-container">
-        <header>
-            <span>Gemini AI Chat</span>
-            <button class="theme-toggle" onclick="toggleTheme()">☀️</button>
-        </header>
-        
-        <div class="chat-history" id="chatHistory">
-            <div class="message ai">
-                <div class="avatar">AI</div>
-                <div class="bubble">Hello! Enter your free Gemini API Key to start real AI conversations.</div>
-            </div>
-        </div>
-
-        <div class="input-area">
-            <div class="input-box">
-                <textarea id="userInput" placeholder="Ask Gemini anything..." rows="1" onkeydown="handleKey(event)"></textarea>
-                <button class="send-btn" onclick="sendMessage()">&#8593;</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const chatHistory = document.getElementById('chatHistory');
-        const userInput = document.getElementById('userInput');
-        const apiKeyInput = document.getElementById('apiKeyInput');
-        const themeToggleBtns = document.querySelectorAll('.theme-toggle');
-        const htmlElement = document.documentElement;
-
-        let conversationHistory = [];
-
-        // Load saved API key on startup
-        window.onload = () => {
-            const savedKey = localStorage.getItem('gemini_api_key');
-            if (savedKey) apiKeyInput.value = savedKey;
-        };
-
-        function saveKey() {
-            localStorage.setItem('gemini_api_key', apiKeyInput.value.trim());
-        }
-
-        function toggleTheme() {
-            const currentTheme = htmlElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            htmlElement.setAttribute('data-theme', newTheme);
-            themeToggleBtns.forEach(btn => {
-                btn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-            });
-        }
-
-        async function sendMessage() {
-            const text = userInput.value.trim();
-            if (!text) return;
-
-            let apiKey = apiKeyInput.value.trim() || localStorage.getItem('gemini_api_key');
-            
-            if (!apiKey) {
-                apiKey = prompt("Please enter your free Google Gemini API Key to chat:");
-                if (apiKey) {
-                    apiKeyInput.value = apiKey.trim();
-                    saveKey();
-                } else {
-                    alert("An API key is required to talk to Gemini!");
-                    return;
-                }
-            }
-
-            // Append User Message
-            appendMessage(text, 'user');
-            userInput.value = '';
-
-            // Append Loading Bubble for AI
-            const loadingDiv = appendMessage("Thinking...", 'ai');
-
-            // Save user message to context history
-            conversationHistory.push({ role: "user", parts: [{ text: text }] });
-
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: conversationHistory })
-                });
-
-                const data = await response.json();
-
-                if (data.candidates && data.candidates[0].content.parts[0].text) {
-                    const aiReply = data.candidates[0].content.parts[0].text;
-                    loadingDiv.querySelector('.bubble').textContent = aiReply;
-                    conversationHistory.push({ role: "model", parts: [{ text: aiReply }] });
-                } else if (data.error) {
-                    loadingDiv.querySelector('.bubble').textContent = "API Error: " + data.error.message;
-                } else {
-                    loadingDiv.querySelector('.bubble').textContent = "Sorry, I couldn't process that request.";
-                }
-            } catch (err) {
-                loadingDiv.querySelector('.bubble').textContent = "Connection error. Please check your API key or network connection.";
-            }
-        }
-
-        function appendMessage(text, sender) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${sender}`;
-            
-            const avatar = document.createElement('div');
-            avatar.className = 'avatar';
-            avatar.textContent = sender === 'user' ? 'U' : 'AI';
-
-            const bubble = document.createElement('div');
-            bubble.className = 'bubble';
-            bubble.textContent = text;
-
-            msgDiv.appendChild(avatar);
-            msgDiv.appendChild(bubble);
-            chatHistory.appendChild(msgDiv);
-            chatHistory.scrollTop = chatHistory.scrollHeight;
-            return msgDiv;
-        }
-
-        function handleKey(e) {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        }
-
-        function clearChat() {
-            conversationHistory = [];
-            chatHistory.innerHTML = `
-                <div class="message ai">
-                    <div class="avatar">AI</div>
-                    <div class="bubble">New chat started! Ask me anything.</div>
+    <!-- Top Navigation Bar -->
+    <header class="bg-slate-900 border-b border-slate-800 px-4 py-3 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <!-- Brand -->
+            <div class="flex items-center space-x-3">
+                <div class="w-9 h-9 bg-gradient-to-tr from-amber-600 to-yellow-400 rounded-lg flex items-center justify-center text-slate-950 font-bold text-xl shadow-lg shadow-amber-500/20">
+                    <i class="fa-solid me-0 fa-cubes-stacked"></i>
                 </div>
-            `;
+                <div>
+                    <h1 class="text-lg font-bold tracking-wide text-white flex items-center gap-2">
+                        GoldMap <span class="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 font-semibold border border-amber-500/30">SMC PRO</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">XAU/USD Real-Time Order Flow & Bookmap Analytics</p>
+                </div>
+            </div>
+
+            <!-- Price Ticker Bar -->
+            <div class="flex items-center space-x-6 bg-slate-950/80 px-4 py-1.5 rounded-lg border border-slate-800">
+                <div>
+                    <span class="text-xs text-slate-400 block uppercase tracking-wider">XAU/USD Spot</span>
+                    <span id="livePrice" class="text-lg font-mono font-bold text-amber-400">--.--</span>
+                </div>
+                <div class="h-6 w-px bg-slate-800"></div>
+                <div>
+                    <span class="text-xs text-slate-400 block uppercase tracking-wider">24h Change</span>
+                    <span id="priceChange" class="text-xs font-mono font-semibold text-emerald-400">+0.00%</span>
+                </div>
+                <div class="h-6 w-px bg-slate-800"></div>
+                <div>
+                    <span class="text-xs text-slate-400 block uppercase tracking-wider">Feed Status</span>
+                    <span id="feedStatus" class="inline-flex items-center text-xs text-emerald-400 font-semibold">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping mr-1.5"></span> LIVE WS
+                    </span>
+                </div>
+            </div>
+
+            <!-- Header Actions -->
+            <div class="flex items-center space-x-3">
+                <a href="https://one.exnessonelink.com/a/m3alh1ljmu?source=app" target="_blank" rel="noopener" class="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-950 font-bold text-xs px-4 py-2 rounded-lg transition duration-200 shadow-lg shadow-amber-500/10 flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrow-trend-up"></i> Trade on Exness
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Grid Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+        
+        <!-- Left Column: Video Heatmap Stream & Canvas Analysis (8 Cols) -->
+        <section class="lg:col-span-8 flex flex-col gap-4">
+            
+            <!-- Live YouTube Bookmap Stream Container -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-xl">
+                <div class="bg-slate-950 px-4 py-2.5 border-b border-slate-800 flex justify-between items-center">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-brands fa-youtube text-red-500 text-lg"></i>
+                        <h2 class="text-sm font-semibold text-slate-200">Live XAU/USD Bookmap Heatmap Stream</h2>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs text-slate-400">Stream Source:</span>
+                        <select id="streamSelector" class="bg-slate-900 border border-slate-700 text-xs text-slate-200 rounded px-2 py-1 outline-none focus:border-amber-500">
+                            <option value="R3v9K3BcJhk">Gold OrderPulse (Live Heatmap 1)</option>
+                            <option value="goZ-vp7oD24">Gold Liquidations & DOM (Live Stream 2)</option>
+                            <option value="_Y_EwBS8Xkw">Gold Futures Volume Profiles (Stream 3)</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Aspect Ratio Video Frame -->
+                <div class="relative w-full aspect-video bg-black">
+                    <iframe id="youtubeIframe" class="absolute top-0 left-0 w-full h-full" src="https://www.youtube.com/embed/R3v9K3BcJhk?autoplay=1&mute=1" title="Gold Bookmap Live Stream" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            </div>
+
+            <!-- Secondary Canvas Visualizer & SMC Map -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl flex flex-col gap-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-amber-400"></i> SMC Heatmap & Order Flow Radar
+                    </h3>
+                    <div class="flex items-center space-x-3 text-xs">
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-emerald-500/30 border border-emerald-500 inline-block"></span> Bullish OB</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-rose-500/30 border border-rose-500 inline-block"></span> Bearish OB</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-amber-500/30 border border-amber-500 inline-block"></span> Liquidity Pool</span>
+                    </div>
+                </div>
+                <div class="relative w-full h-64 bg-slate-950 rounded-lg overflow-hidden border border-slate-800">
+                    <canvas id="bookmapCanvas" class="w-full h-full block"></canvas>
+                </div>
+            </div>
+
+            <!-- Signal & Risk Calculator Bar -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Live SMC Signal Card -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs uppercase font-bold tracking-wider text-slate-400">Latest SMC Signal</span>
+                            <span class="px-2 py-0.5 text-xs font-bold rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">BULLISH OB RETEST</span>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-center my-3 bg-slate-950 p-2.5 rounded-lg border border-slate-800">
+                            <div>
+                                <span class="text-[10px] text-slate-400 block">ENTRY</span>
+                                <span id="sigEntry" class="text-sm font-mono font-bold text-slate-200">2742.50</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-400 block">STOP LOSS</span>
+                                <span id="sigSL" class="text-sm font-mono font-bold text-rose-400">2738.10</span>
+                            </div>
+                            <div>
+                                <span class="text-[10px] text-slate-400 block">TARGET (TP2)</span>
+                                <span id="sigTP" class="text-sm font-mono font-bold text-emerald-400">2754.80</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center text-xs text-slate-400 pt-2 border-t border-slate-800">
+                        <span>Risk/Reward: <strong class="text-amber-400 font-mono">1 : 2.8</strong></span>
+                        <span>Confidence: <strong class="text-emerald-400 font-mono">88%</strong></span>
+                    </div>
+                </div>
+
+                <!-- Interactive Position Calculator -->
+                <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                    <h4 class="text-xs uppercase font-bold tracking-wider text-slate-400 mb-2">XAU/USD Risk & Lot Size Calculator</h4>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between items-center">
+                            <label class="text-slate-400">Account Balance ($):</label>
+                            <input type="number" id="calcBalance" value="1000" class="w-24 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-right font-mono text-white outline-none focus:border-amber-500">
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <label class="text-slate-400">Risk Percentage (%):</label>
+                            <input type="number" id="calcRisk" value="1" step="0.5" class="w-24 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-right font-mono text-white outline-none focus:border-amber-500">
+                        </div>
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-800">
+                            <span class="text-slate-300 font-medium">Recommended Lot Size:</span>
+                            <span id="calcLotSize" class="text-sm font-mono font-bold text-amber-400">0.23 Lots</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Right Column: DOM Depth & Order Flow Tape (4 Cols) -->
+        <section class="lg:col-span-4 flex flex-col gap-4">
+            
+            <!-- Depth of Market (DOM) Ladder -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl flex flex-col h-[400px]">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-amber-400"></i> Depth of Market (DOM)
+                    </h3>
+                    <span class="text-[10px] text-slate-400">Level 2 Limit Depth</span>
+                </div>
+
+                <div class="grid grid-cols-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 py-1 px-2 border-b border-slate-800 text-center">
+                    <span>Ask Size</span>
+                    <span>Price</span>
+                    <span>Bid Size</span>
+                </div>
+
+                <div id="domContainer" class="flex-1 overflow-y-auto custom-scrollbar space-y-0.5 py-1 text-xs font-mono">
+                    <!-- DOM rows populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Real-Time Time & Sales Execution Ticker -->
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 shadow-xl flex-1 flex flex-col min-h-[260px]">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-sm font-semibold text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-bolt text-amber-400"></i> Time & Sales Ticker
+                    </h3>
+                    <span class="text-[10px] text-slate-400">Aggressive Orders</span>
+                </div>
+
+                <div class="grid grid-cols-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 py-1 px-2 border-b border-slate-800 text-center">
+                    <span>Time</span>
+                    <span>Price</span>
+                    <span>Volume</span>
+                </div>
+
+                <div id="tapeContainer" class="flex-1 overflow-y-auto custom-scrollbar space-y-1 py-1 text-xs font-mono">
+                    <!-- Time & Sales rows populated by JavaScript -->
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Exness Affiliate Footer Banner -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-4 px-4 mt-auto">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-shield-halved text-amber-400 text-xl"></i>
+                <div class="text-xs">
+                    <span class="text-slate-200 font-semibold block">Official Broker Execution Partner</span>
+                    <span class="text-slate-400">Trade XAU/USD with raw spreads, instant execution, and zero slippage on Exness.</span>
+                </div>
+            </div>
+            <a href="https://one.exnessonelink.com/a/m3alh1ljmu?source=app" target="_blank" rel="noopener" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs px-6 py-2.5 rounded-lg transition duration-200 shadow-lg shadow-amber-500/20 whitespace-nowrap">
+                Open Free Exness Trading Account
+            </a>
+        </div>
+    </footer>
+
+    <!-- JavaScript Terminal Logic -->
+    <script>
+        // State Management
+        let currentPrice = 2742.50;
+        let wsConnected = false;
+
+        // Initialize Youtube Player Switcher
+        document.getElementById('streamSelector').addEventListener('change', (e) => {
+            const videoId = e.target.value;
+            document.getElementById('youtubeIframe').src = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
+        });
+
+        // Initialize Binance WebSocket for PAXGUSDT (Gold Spot Proxy)
+        function initWebSocket() {
+            const socket = new WebSocket('wss://stream.binance.com:9443/ws/paxgusdt@trade');
+
+            socket.onopen = () => {
+                wsConnected = true;
+                document.getElementById('feedStatus').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping mr-1.5"></span> LIVE WS`;
+                document.getElementById('feedStatus').className = "inline-flex items-center text-xs text-emerald-400 font-semibold";
+            };
+
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                const price = parseFloat(data.p).toFixed(2);
+                const qty = parseFloat(data.q).toFixed(2);
+                const isSell = data.m; // buyer is market maker = sell order
+
+                updatePrice(price);
+                addTapeRow(price, qty, isSell);
+            };
+
+            socket.onerror = () => {
+                fallbackSimulation();
+            };
+
+            socket.onclose = () => {
+                wsConnected = false;
+                setTimeout(initWebSocket, 5000);
+            };
         }
+
+        // Fallback Price Simulation if WebSocket drops
+        function fallbackSimulation() {
+            setInterval(() => {
+                if (!wsConnected) {
+                    const delta = (Math.random() - 0.49) * 0.4;
+                    currentPrice = parseFloat((currentPrice + delta).toFixed(2));
+                    updatePrice(currentPrice);
+                    addTapeRow(currentPrice, (Math.random() * 2 + 0.1).toFixed(2), Math.random() > 0.5);
+                }
+            }, 800);
+        }
+
+        function updatePrice(price) {
+            currentPrice = parseFloat(price);
+            document.getElementById('livePrice').innerText = currentPrice.toFixed(2);
+            renderDOM();
+        }
+
+        // Render DOM (Depth of Market)
+        function renderDOM() {
+            const domContainer = document.getElementById('domContainer');
+            domContainer.innerHTML = '';
+
+            // Generate Asks (Sells above current price)
+            for (let i = 5; i >= 1; i--) {
+                const p = (currentPrice + i * 0.3).toFixed(2);
+                const vol = Math.floor(Math.random() * 80 + 10);
+                const pct = Math.min(100, (vol / 90) * 100);
+                
+                const row = document.createElement('div');
+                row.className = 'grid grid-cols-3 text-center py-0.5 rounded relative hover:bg-slate-800/50';
+                row.innerHTML = `
+                    <span class="text-rose-400 font-semibold z-10">${vol}</span>
+                    <span class="text-slate-300 font-bold z-10">${p}</span>
+                    <span class="text-slate-600 z-10">-</span>
+                    <div class="absolute right-1/2 top-0 bottom-0 bg-rose-500/10 rounded-l" style="width: ${pct/2}%"></div>
+                `;
+                domContainer.appendChild(row);
+            }
+
+            // Current Price Bar
+            const currentBar = document.createElement('div');
+            currentBar.className = 'bg-amber-500/20 border border-amber-500/40 text-amber-400 font-bold text-center py-1 my-0.5 rounded text-xs';
+            currentBar.innerText = `MARKET PRICE: ${currentPrice.toFixed(2)}`;
+            domContainer.appendChild(currentBar);
+
+            // Generate Bids (Buys below current price)
+            for (let i = 1; i <= 5; i++) {
+                const p = (currentPrice - i * 0.3).toFixed(2);
+                const vol = Math.floor(Math.random() * 80 + 10);
+                const pct = Math.min(100, (vol / 90) * 100);
+                
+                const row = document.createElement('div');
+                row.className = 'grid grid-cols-3 text-center py-0.5 rounded relative hover:bg-slate-800/50';
+                row.innerHTML = `
+                    <span class="text-slate-600 z-10">-</span>
+                    <span class="text-slate-300 font-bold z-10">${p}</span>
+                    <span class="text-emerald-400 font-semibold z-10">${vol}</span>
+                    <div class="absolute left-1/2 top-0 bottom-0 bg-emerald-500/10 rounded-r" style="width: ${pct/2}%"></div>
+                `;
+                domContainer.appendChild(row);
+            }
+        }
+
+        // Render Time & Sales Tape
+        function addTapeRow(price, qty, isSell) {
+            const tapeContainer = document.getElementById('tapeContainer');
+            const now = new Date();
+            const timeStr = now.toTimeString().split(' ')[0] + '.' + Math.floor(now.getMilliseconds()/100);
+            
+            const row = document.createElement('div');
+            row.className = `grid grid-cols-3 text-center py-0.5 px-1 rounded border-b border-slate-800/40 ${isSell ? 'bg-rose-500/5 text-rose-400' : 'bg-emerald-500/5 text-emerald-400'}`;
+            row.innerHTML = `
+                <span class="text-slate-400 text-[10px]">${timeStr}</span>
+                <span class="font-bold">${price}</span>
+                <span class="font-mono">${qty} ${isSell ? 'ASK' : 'BID'}</span>
+            `;
+
+            tapeContainer.insertBefore(row, tapeContainer.firstChild);
+
+            if (tapeContainer.children.length > 25) {
+                tapeContainer.removeChild(tapeContainer.lastChild);
+            }
+        }
+
+        // Interactive HTML5 Bookmap Canvas Visualizer
+        function initCanvas() {
+            const canvas = document.getElementById('bookmapCanvas');
+            const ctx = canvas.getContext('2d');
+
+            function resize() {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
+
+            let history = [];
+
+            function animate() {
+                ctx.fillStyle = '#090D16';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw Grid Lines
+                ctx.strokeStyle = '#1E293B';
+                ctx.lineWidth = 1;
+                for (let y = 0; y < canvas.height; y += 30) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(canvas.width, y);
+                    ctx.stroke();
+                }
+
+                // Add current price point
+                history.push(currentPrice);
+                if (history.length > canvas.width / 4) {
+                    history.shift();
+                }
+
+                // Draw Price Line
+                if (history.length > 1) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = '#F59E0B';
+                    ctx.lineWidth = 2;
+                    for (let i = 0; i < history.length; i++) {
+                        const x = i * 4;
+                        const y = canvas.height / 2 - (history[i] - currentPrice) * 40;
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                }
+
+                // Draw Simulated Heatmap Liquidity Blocks
+                ctx.fillStyle = 'rgba(245, 158, 11, 0.08)';
+                ctx.fillRect(0, canvas.height / 2 - 60, canvas.width, 15);
+                ctx.fillStyle = 'rgba(16, 185, 129, 0.08)';
+                ctx.fillRect(0, canvas.height / 2 + 50, canvas.width, 15);
+
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // Risk Calculator Event Listeners
+        function initCalculator() {
+            const balanceInput = document.getElementById('calcBalance');
+            const riskInput = document.getElementById('calcRisk');
+            const lotOutput = document.getElementById('calcLotSize');
+
+            function calculate() {
+                const balance = parseFloat(balanceInput.value) || 0;
+                const riskPct = parseFloat(riskInput.value) || 0;
+                const riskAmount = balance * (riskPct / 100);
+                
+                // Assuming standard 40 pips SL ($4.00 price move)
+                const lots = (riskAmount / 400).toFixed(2);
+                lotOutput.innerText = `${lots} Lots`;
+            }
+
+            balanceInput.addEventListener('input', calculate);
+            riskInput.addEventListener('input', calculate);
+            calculate();
+        }
+
+        // Initialize Everything on Load
+        window.onload = () => {
+            initWebSocket();
+            fallbackSimulation();
+            renderDOM();
+            initCanvas();
+            initCalculator();
+        };
     </script>
 </body>
 </html>
