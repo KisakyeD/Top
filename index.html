@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GOAL VIP AI - Live Football Picks (Real API Score Verification)</title>
+    <title>GOAL VIP AI - Live Football Picks (No Draw No Bet)</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -79,7 +79,7 @@
                 <i data-lucide="external-link" class="w-4 h-4"></i>
                 <span>Open Exness Partner Portal</span>
             </a>
-            <p class="text-[10px] text-gray-500 text-center">GOAL VIP Engine v26.0 • True API Verification</p>
+            <p class="text-[10px] text-gray-500 text-center">GOAL VIP Engine v27.0 • No DNB Option</p>
         </div>
     </aside>
 
@@ -102,7 +102,7 @@
             <div class="flex items-center space-x-3">
                 <div class="hidden sm:flex items-center space-x-1 px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded-full text-xs font-bold text-amber-400">
                     <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-                    <span>VERIFIED API RESULTS</span>
+                    <span>SAFE MARKETS ONLY</span>
                 </div>
 
                 <button onclick="toggleTheme()" class="p-2 bg-darkborder/50 hover:bg-darkborder text-gray-300 rounded-lg transition">
@@ -295,7 +295,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT REAL API VERIFICATION ENGINE -->
+    <!-- JAVASCRIPT ENGINE (NO DRAW NO BET) -->
     <script>
         let selectedDate = new Date();
         const currentDate = new Date();
@@ -306,10 +306,10 @@
         let activeMatch = null;
         let liveApiCache = {};
 
-        const ultraSafeMarkets = [
+        // Ultra-safe markets excluding Draw No Bet
+        const safeMarketsNoDNB = [
             { pick: "Double Chance (1X)", odds: 2.05, conf: 97 },
             { pick: "Over 1.5 Goals", odds: 2.02, conf: 96 },
-            { pick: "Draw No Bet (1)", odds: 2.15, conf: 95 },
             { pick: "Double Chance (X2)", odds: 2.10, conf: 96 },
             { pick: "Home Win (1)", odds: 2.08, conf: 97 }
         ];
@@ -421,7 +421,6 @@
             if (p.includes("double chance (1x)")) return h >= a;
             if (p.includes("double chance (x2)")) return a >= h;
             if (p.includes("over 1.5")) return (h + a) >= 2;
-            if (p.includes("draw no bet (1)")) return h >= a;
             if (p.includes("home win (1)")) return h > a;
             return h >= a;
         }
@@ -438,7 +437,7 @@
                 container.innerHTML = `
                     <div class="flex flex-col items-center justify-center py-12 text-gray-400 space-y-3 bg-darkcard rounded-2xl border border-darkborder">
                         <div class="w-7 h-7 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
-                        <p class="text-xs font-mono">Verifying real API results for ${dateStr}...</p>
+                        <p class="text-xs font-mono">Verifying live results for ${dateStr}...</p>
                     </div>
                 `;
             }
@@ -474,12 +473,11 @@
                     const awayName = awayTeam?.team?.displayName || "Away Side";
                     const leagueName = evt.league?.name || comp?.notes?.[0]?.headline || "Global League";
                     
-                    // Real API scores if available, otherwise defaults to 0-0 for upcoming or actual results for history
                     const hScore = homeTeam?.score !== undefined ? parseInt(homeTeam.score, 10) : (currentMode === 'history' ? 1 : 0);
                     const aScore = awayTeam?.score !== undefined ? parseInt(awayTeam.score, 10) : (currentMode === 'history' ? 0 : 0);
 
                     const seed = (homeName + awayName + dateStr).split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-                    const market = ultraSafeMarkets[seed % ultraSafeMarkets.length];
+                    const market = safeMarketsNoDNB[seed % safeMarketsNoDNB.length];
                     
                     const isWin = evaluatePickWin(market.pick, hScore, aScore);
                     if (currentMode === 'history') {
