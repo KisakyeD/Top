@@ -39,7 +39,6 @@
     <!-- Sidebar Drawer Menu -->
     <aside id="sidebarDrawer" class="fixed top-0 left-0 bottom-0 w-80 bg-darkcard border-r border-darkborder z-50 transform -translate-x-full transition-transform duration-300 flex flex-col justify-between p-5">
         <div class="space-y-6">
-            <!-- Sidebar Header (Clickable Logo) -->
             <div class="flex items-center justify-between border-b border-darkborder pb-4">
                 <button onclick="switchView('main')" class="flex items-center space-x-2 text-left focus:outline-none group">
                     <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center font-black text-darkbg text-lg tracking-tighter group-hover:scale-105 transition-transform">
@@ -52,14 +51,12 @@
                 </button>
             </div>
 
-            <!-- Navigation Links -->
             <nav class="space-y-2">
                 <button onclick="switchView('main')" class="w-full px-4 py-3 bg-darkborder/40 hover:bg-darkborder/80 text-white rounded-xl text-xs font-bold flex items-center space-x-3 transition">
                     <i data-lucide="layout-dashboard" class="w-4 h-4 text-emerald-400"></i>
                     <span>Live Dashboard</span>
                 </button>
 
-                <!-- VIP Categories -->
                 <div class="space-y-1 pt-2">
                     <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider px-4">VIP Tickets</span>
                     
@@ -103,7 +100,6 @@
             </nav>
         </div>
 
-        <!-- Footer Affiliate Link -->
         <div class="pt-4 border-t border-darkborder space-y-3">
             <a href="https://one.exnessonelink.com/a/m3alh1ljmu?source=app" target="_blank" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-darkbg font-bold rounded-xl text-xs flex items-center justify-center space-x-2 transition shadow">
                 <i data-lucide="external-link" class="w-4 h-4"></i>
@@ -117,12 +113,10 @@
     <header class="border-b border-darkborder bg-darkcard/90 backdrop-blur sticky top-0 z-40">
         <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <!-- Hamburger Button -->
                 <button onclick="openSidebar()" class="p-2 hover:bg-darkborder/60 rounded-lg text-gray-300 transition focus:outline-none">
                     <i data-lucide="menu" class="w-6 h-6"></i>
                 </button>
 
-                <!-- Clickable Header Logo (Navigates to Home) -->
                 <button onclick="switchView('main')" class="flex items-center space-x-2 focus:outline-none group">
                     <div class="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center font-black text-darkbg text-lg tracking-tighter group-hover:scale-105 transition-transform">
                         G
@@ -131,9 +125,7 @@
                 </button>
             </div>
 
-            <!-- Header Controls -->
             <div class="flex items-center space-x-3">
-                <!-- VIP Quick Access Button -->
                 <button onclick="switchView('vip')" class="px-3 py-1 bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full text-xs font-bold flex items-center gap-1.5 transition glow-gold hover:bg-amber-500/30">
                     <i data-lucide="crown" class="w-3.5 h-3.5"></i>
                     <span>VIP TICKETS</span>
@@ -155,7 +147,6 @@
     <!-- MAIN DASHBOARD VIEW -->
     <main id="mainView" class="max-w-4xl mx-auto px-4 py-4 w-full flex-grow space-y-4">
         
-        <!-- SPONSORED BY EXNESS PROMO BANNER -->
         <a href="https://one.exnessonelink.com/a/m3alh1ljmu?source=app" target="_blank" class="block w-full bg-gradient-to-r from-amber-500/20 via-darkcard to-darkcard border border-amber-500/40 rounded-2xl p-3.5 hover:border-amber-400 transition shadow-lg group relative overflow-hidden">
             <div class="flex items-center justify-between gap-3">
                 <div class="flex items-center space-x-3 min-w-0">
@@ -179,12 +170,8 @@
             </div>
         </a>
 
-        <!-- League Category Filter Pills -->
-        <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1" id="leagueFilterPills">
-            <!-- Dynamically populated via JS -->
-        </div>
+        <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1" id="leagueFilterPills"></div>
 
-        <!-- VIP-Style Fast Calendar Toolbar for Dashboard -->
         <div class="flex items-center justify-between bg-darkcard border border-darkborder p-2.5 rounded-xl text-xs font-medium">
             <span class="text-gray-400 font-bold uppercase tracking-wider text-[10px]">MATCH DATE:</span>
             <div class="flex items-center space-x-2">
@@ -198,10 +185,7 @@
             </div>
         </div>
 
-        <!-- League Matches Container -->
-        <div id="matchesList" class="space-y-4">
-            <!-- Dynamic Content populated via JavaScript -->
-        </div>
+        <div id="matchesList" class="space-y-4"></div>
     </main>
 
     <!-- VIP PREDICTIONS VIEW -->
@@ -225,23 +209,13 @@
                 </div>
             </div>
 
-            <!-- Odds Category Tier Selector Pills -->
             <div class="flex items-center space-x-2 border-b border-darkborder/60 pb-3 overflow-x-auto no-scrollbar">
-                <button onclick="setVipTier('5')" id="vipTierBtn5" class="px-4 py-1.5 rounded-xl text-xs font-bold border transition bg-darkborder/60 text-gray-300 border-darkborder whitespace-nowrap">
-                    Odd 5+ Ticket
-                </button>
-                <button onclick="setVipTier('10')" id="vipTierBtn10" class="px-4 py-1.5 rounded-xl text-xs font-bold border transition bg-amber-500 text-darkbg border-amber-500 font-black shadow whitespace-nowrap">
-                    Odd 10+ Ticket
-                </button>
-                <button onclick="setVipTier('20')" id="vipTierBtn20" class="px-4 py-1.5 rounded-xl text-xs font-bold border transition bg-darkborder/60 text-gray-300 border-darkborder whitespace-nowrap">
-                    Odd 20+ Ticket
-                </button>
-                <button onclick="setVipTier('50')" id="vipTierBtn50" class="px-4 py-1.5 rounded-xl text-xs font-bold border transition bg-darkborder/60 text-gray-300 border-darkborder whitespace-nowrap">
-                    Odd 50+ Mega
-                </button>
+                <button onclick="setVipTier('5')" id="vipTierBtn5" class="px-4 py-1.5 rounded-xl text-xs font-bold border transition bg-darkborder/60 text-gray-300 border-darkborder whitespace-nowrap">Odd 5+ Ticket</button>
+                <button onclick="setVipTier('10')" id="vipTierBtn10" class="px-4 py-1.5 rounded-xl text-xs font-bold border transition bg-amber-500 text-darkbg border-amber-500 font-black shadow whitespace-nowrap">Odd 10+ Ticket</button>
+                <button onclick="setVipTier('20')" id="vipTierBtn20" class="px-4 py-1.5 rounded-xl text-xs font-bold border transition bg-darkborder/60 text-gray-300 border-darkborder whitespace-nowrap">Odd 20+ Ticket</button>
+                <button onclick="setVipTier('50')" id="vipTierBtn50" class="px-4 py-1.5 rounded-xl text-xs font-bold border transition bg-darkborder/60 text-gray-300 border-darkborder whitespace-nowrap">Odd 50+ Mega</button>
             </div>
 
-            <!-- VIP Ticket Interactive Calendar Toolbar -->
             <div class="flex items-center justify-between bg-darkbg/80 border border-darkborder p-2.5 rounded-xl text-xs">
                 <span class="text-gray-400 font-bold uppercase tracking-wider text-[10px]">TICKET DATE:</span>
                 <div class="flex items-center space-x-2">
@@ -255,17 +229,10 @@
                 </div>
             </div>
 
-            <!-- VIP Ticket Status Badge Header -->
-            <div id="vipStatusBanner" class="flex justify-between items-center px-3 py-2 bg-darkbg/60 rounded-lg text-xs font-bold border border-darkborder">
-                <!-- Populated dynamically via JS -->
-            </div>
+            <div id="vipStatusBanner" class="flex justify-between items-center px-3 py-2 bg-darkbg/60 rounded-lg text-xs font-bold border border-darkborder"></div>
 
-            <!-- VIP Combined Selections Container -->
-            <div id="vipTicketList" class="space-y-3">
-                <!-- Dynamically Rendered Live VIP Leg Items -->
-            </div>
+            <div id="vipTicketList" class="space-y-3"></div>
 
-            <!-- VIP Ticket Actions -->
             <div class="flex flex-wrap justify-between items-center pt-2 gap-3">
                 <button onclick="copyVipTicket()" class="px-4 py-2.5 bg-darkborder/80 hover:bg-darkborder text-gray-200 rounded-xl text-xs font-bold flex items-center space-x-2 transition">
                     <i data-lucide="copy" class="w-4 h-4 text-amber-400"></i>
@@ -345,7 +312,6 @@
                 <p id="modalMatchLeague" class="text-xs text-gray-400 font-medium">League</p>
             </div>
 
-            <!-- Highlighted Single Pick Box -->
             <div class="bg-darkbg/90 border border-emerald-500/30 p-4 rounded-xl space-y-3">
                 <div class="flex justify-between items-center border-b border-darkborder/60 pb-2">
                     <div class="flex items-center space-x-2">
@@ -362,7 +328,6 @@
                     </div>
                 </div>
 
-                <!-- Tactical Formations Breakdown -->
                 <div class="grid grid-cols-2 gap-3 pt-2 border-t border-darkborder/60 text-xs">
                     <div class="bg-darkbg p-2.5 rounded-xl border border-darkborder">
                         <span class="text-[10px] text-gray-400 block uppercase font-mono">Home Formation</span>
@@ -374,7 +339,6 @@
                     </div>
                 </div>
 
-                <!-- Injury Report -->
                 <div class="pt-2 border-t border-darkborder/60">
                     <span class="text-[10px] text-gray-400 block uppercase font-mono mb-1">Injury & Squad News</span>
                     <p id="modalInjuryReport" class="text-xs text-gray-300">Evaluating player availability...</p>
@@ -442,16 +406,13 @@
             }
         }
 
-        // AI Engine with Formations & Injury Impact Analysis
         function generateAiPrediction(homeName, awayName, homeScore, awayScore, dateSeed) {
             const seedStr = (homeName + awayName + (dateSeed || '')).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
             
-            // Tactical formations pool
             const formations = ['4-3-3', '4-4-2', '4-2-3-1', '3-5-2', '3-4-3', '5-3-2'];
             const homeForm = formations[seedStr % formations.length];
             const awayForm = formations[(seedStr + 2) % formations.length];
 
-            // Injury & squad news simulations
             const injuryPool = [
                 `Home missing starting center-back (Suspended); Away full squad available.`,
                 `Away top goalscorer doubtful due to minor hamstring strain.`,
@@ -910,7 +871,6 @@
             document.getElementById('modalLeg1').innerText = matchObj.leg1;
             document.getElementById('modalRationale').innerText = matchObj.rationale;
             
-            // Populate tactical formations & injury report
             document.getElementById('modalHomeFormation').innerText = matchObj.homeFormation || '4-3-3';
             document.getElementById('modalAwayFormation').innerText = matchObj.awayFormation || '4-4-2';
             document.getElementById('modalInjuryReport').innerText = matchObj.injuryReport || 'Standard matchday squad rotation.';
